@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trắc nghiệm IQ</title>
+  <meta name="description" content="Bài trắc nghiệm IQ trực tuyến 35 câu, chấm điểm theo chuẩn IQ độ lệch (trung bình 100, độ lệch chuẩn 15).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="nav-wrap">
+    <nav class="nav">
+      <a class="logo" href="#" data-go="intro">iq<span>.</span>test</a>
+      <div class="nav-links">
+        <a href="#scale" data-go="intro">Thang đo</a>
+        <a href="#method" data-go="intro">Phương pháp</a>
+      </div>
+      <div class="nav-status" id="nav-status" hidden>
+        <span class="timer" id="timer">35:00</span>
+      </div>
+      <button class="btn btn-yellow btn-sm" data-action="start" id="nav-cta">Làm bài ngay</button>
+    </nav>
+  </header>
+
+  <!-- ═════════ GIỚI THIỆU ═════════ -->
+  <main id="screen-intro" class="screen">
+    <section class="hero">
+      <p class="eyebrow">Trắc nghiệm trí tuệ · Chuẩn Wechsler</p>
+      <h1>Đo chỉ số IQ<br>của bạn trong 35 phút</h1>
+      <p class="lead">35 câu hỏi về dãy số, ngôn ngữ, logic và ma trận hình. Điểm được tính bằng mô hình IRT và quy đổi sang thang IQ độ lệch chuẩn quốc tế — trung bình 100, độ lệch chuẩn 15.</p>
+      <button class="btn btn-yellow btn-lg" data-action="start">Bắt đầu làm bài</button>
+      <ul class="hero-stats">
+        <li><strong>35</strong><span>câu hỏi</span></li>
+        <li><strong>35′</strong><span>thời gian</span></li>
+        <li><strong>4</strong><span>lĩnh vực</span></li>
+        <li><strong>40–160</strong><span>phạm vi đo</span></li>
+      </ul>
+    </section>
+
+    <section class="domains">
+      <article class="tile t-blue"><span class="tile-k">01</span><h3>Suy luận số</h3><p>Tìm quy luật ẩn trong dãy số.</p></article>
+      <article class="tile t-pink"><span class="tile-k">02</span><h3>Ngôn ngữ</h3><p>Loại suy, đồng nghĩa, quan hệ từ.</p></article>
+      <article class="tile t-green"><span class="tile-k">03</span><h3>Logic</h3><p>Suy diễn, tam đoạn luận, câu đố.</p></article>
+      <article class="tile t-orange"><span class="tile-k">04</span><h3>Ma trận hình</h3><p>Kiểu Raven – tư duy trực quan trừu tượng.</p></article>
+    </section>
+
+    <section class="band-section" id="scale">
+      <p class="eyebrow">Thang đo IQ</p>
+      <h2>Từ rất thấp đến thiên tài</h2>
+      <p class="section-lead">Phân loại dựa trên thang Wechsler (WAIS) và Stanford-Binet 5. Tỷ lệ dân số tính theo phân phối chuẩn N(100, 15²).</p>
+      <div class="band-grid" id="band-grid"></div>
+    </section>
+
+    <section class="method" id="method">
+      <p class="eyebrow">Phương pháp</p>
+      <h2>Điểm IQ được tính thế nào?</h2>
+      <div class="method-grid">
+        <article class="m-card">
+          <span class="m-step">1</span>
+          <h3>Ước lượng năng lực θ</h3>
+          <p>Mỗi câu có độ khó <em>b</em>, độ phân biệt <em>a</em> và xác suất đoán mò <em>c</em>. Câu khó làm đúng được tính nhiều hơn câu dễ, đoán mò bị trừ hao — theo Lý thuyết Ứng đáp Câu hỏi (IRT 3PL), chuẩn của GRE, PISA và các bài test thích ứng.</p>
+          <code>P(đúng) = c + (1 − c) / (1 + e<sup>−a(θ − b)</sup>)</code>
+        </article>
+        <article class="m-card">
+          <span class="m-step">2</span>
+          <h3>Quy đổi sang IQ độ lệch</h3>
+          <p>θ được chuẩn hoá theo dân số (trung bình 0, độ lệch chuẩn 1), sau đó quy đổi theo công thức IQ độ lệch do David Wechsler đưa ra năm 1939 — chuẩn của WAIS, WISC và Stanford-Binet 5.</p>
+          <code>IQ = 100 + 15 × z</code>
+        </article>
+        <article class="m-card">
+          <span class="m-step">3</span>
+          <h3>Khoảng tin cậy &amp; bách phân vị</h3>
+          <p>Không bài test nào đo chính xác tuyệt đối. Kết quả kèm khoảng tin cậy 95% (± 1,96 sai số chuẩn) và bách phân vị — tỷ lệ người có IQ thấp hơn bạn.</p>
+          <code>Bách phân vị = Φ(z) × 100%</code>
+        </article>
+        <article class="m-card">
+          <span class="m-step">4</span>
+          <h3>Chuẩn theo độ tuổi</h3>
+          <p>Giống WAIS và WISC, bạn được so với người cùng nhóm tuổi. Một em 12 tuổi và một người 30 tuổi làm đúng cùng số câu sẽ có IQ khác nhau, vì năng lực suy luận phát triển đến khoảng 20–34 tuổi rồi giảm dần.</p>
+          <code>z = (θ − μ<sub>tuổi</sub>) / σ</code>
+        </article>
+      </div>
+      <p class="disclaimer">Lưu ý: đây là bài trắc nghiệm tham khảo. Độ khó câu hỏi được ước lượng theo chuyên môn, chưa chuẩn hoá trên mẫu dân số thực. Chỉ các bài test do chuyên gia tâm lý thực hiện (WAIS-5, Stanford-Binet 5, Raven's) mới có giá trị chẩn đoán.</p>
+    </section>
+
+    <footer class="foot">© iq.test — Trắc nghiệm tham khảo, không thay thế đánh giá lâm sàng.</footer>
+  </main>
+
+  <!-- ═════════ LÀM BÀI ═════════ -->
+  <main id="screen-test" class="screen" hidden>
+    <div class="test-wrap">
+      <div class="test-top">
+        <span class="q-count" id="q-count">Câu 1 / 35</span>
+        <span class="chip" id="q-domain">Suy luận số</span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+
+      <article class="q-card" id="q-card"></article>
+
+      <div class="test-actions">
+        <button class="btn btn-ghost" id="btn-prev">← Câu trước</button>
+        <button class="btn btn-dark" id="btn-next">Câu tiếp →</button>
+      </div>
+
+      <div class="palette-wrap">
+        <div class="palette" id="palette"></div>
+        <button class="btn btn-yellow" id="btn-submit">Nộp bài</button>
+      </div>
+      <p class="kbd-hint">Phím tắt: <kbd>1</kbd>–<kbd>6</kbd> chọn đáp án · <kbd>←</kbd> <kbd>→</kbd> chuyển câu</p>
+    </div>
+  </main>
+
+  <!-- ═════════ KẾT QUẢ ═════════ -->
+  <main id="screen-result" class="screen" hidden>
+    <div class="result-wrap" id="result"></div>
+  </main>
+
+  <dialog id="age-dialog" class="dialog">
+    <form id="age-form" method="dialog">
+      <p class="eyebrow">Trước khi bắt đầu</p>
+      <h3>Bạn bao nhiêu tuổi?</h3>
+      <p>IQ được so sánh với người <strong>cùng độ tuổi</strong> — đây là quy chuẩn của WAIS, WISC và Stanford-Binet.</p>
+      <label class="field">
+        <input type="number" id="age-input" inputmode="numeric" min="10" max="90" step="1" placeholder="VD: 25" required>
+        <span>tuổi</span>
+      </label>
+      <p class="field-err" id="age-err" hidden>Vui lòng nhập tuổi từ 10 đến 90.</p>
+      <label class="consent" id="consent-row">
+        <input type="checkbox" id="consent-input" checked>
+        <span>Đóng góp kết quả <strong>ẩn danh</strong> (tuổi và đáp án từng câu) để cải thiện độ chính xác của bài test. Không thu thập tên, email hay địa chỉ IP.</span>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="age-cancel">Huỷ</button>
+        <button type="submit" class="btn btn-yellow">Bắt đầu làm bài</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm" class="dialog">
+    <h3>Nộp bài?</h3>
+    <p id="confirm-text"></p>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" value="cancel" id="confirm-cancel">Làm tiếp</button>
+      <button class="btn btn-yellow" id="confirm-ok">Nộp bài</button>
+    </div>
+  </dialog>
+
+  <script src="js/config.js"></script>
+  <script src="js/params.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

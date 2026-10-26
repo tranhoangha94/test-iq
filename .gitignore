@@ -1,0 +1,8 @@
+# Dữ liệu người làm bài – không đưa lên git
+data/
+
+__pycache__/
+*.pyc
+.claude/
+.DS_Store
+Thumbs.db
