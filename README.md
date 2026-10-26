@@ -18,13 +18,15 @@ Mở http://localhost:5173. Server vừa phục vụ website, vừa nhận kết
 | `index.html` | 3 màn hình: giới thiệu, làm bài, kết quả |
 | `css/style.css` | Giao diện |
 | `js/config.js` | Cấu hình địa chỉ nhận kết quả ẩn danh (`collectUrl`) |
-| `js/questions.js` | Ngân hàng 45 câu, tham số IRT ban đầu (`a`, `b`), phiên bản `QUESTION_BANK_VERSION` |
+| `js/questions.js` | 45 **khuôn** câu hỏi (sinh biến thể mới mỗi lần làm), tham số IRT (`a`, `b`), phiên bản `QUESTION_BANK_VERSION` |
+| `js/form.js` | Tạo bộ đề: chọn biến thể chưa gặp, cân bằng vị trí đáp án A/B/C… |
 | `js/params.js` | Tham số đã chuẩn hoá từ dữ liệu thực (do `tools/calibrate.py` tạo; mặc định `null`) |
 | `js/scoring.js` | Chấm điểm: IRT 3PL + EAP, chuẩn tuổi, IQ độ lệch (100 + 15z) |
 | `js/app.js` | Luồng làm bài, đồng hồ, lưu tiến độ, gửi kết quả, vẽ trang kết quả |
 | `server.py` | Server tĩnh + `POST /api/results` (chỉ dùng thư viện chuẩn Python) |
 | `tools/calibrate.py` | Chuẩn hoá lại tham số IRT và chuẩn tuổi từ dữ liệu thu được |
 | `tools/simulate.py` | Tạo dữ liệu giả lập để kiểm tra `calibrate.py` |
+| `tools/validate_items.js` | Kiểm tra tự động độ chính xác và sai lệch của ngân hàng câu hỏi |
 
 ## Thu thập kết quả ẩn danh
 
@@ -32,12 +34,14 @@ Khi bắt đầu làm bài, người dùng thấy ô **“Đóng góp kết qu�
 Nếu đồng ý, khi nộp bài trình duyệt gửi:
 
 ```json
-{ "bank": "v1", "age": 28, "attempt": 1, "elapsed": 1260, "timeLimit": 2100,
+{ "bank": "v3", "age": 28, "attempt": 1, "elapsed": 1260, "timeLimit": 2700,
   "responses": { "n1": 1, "v1": 0, "m9": null },
-  "choices":   { "n1": "10", "v1": "Gáy" } }
+  "choices":   { "n1": "10", "v1": "Gáy" },
+  "variants":  { "n1": 2918374651, "v1": 88213 } }
 ```
 
 - `responses`: 1 = đúng, 0 = sai, `null` = bỏ trống. `choices`: phương án đã chọn, dùng để phân tích phương án nhiễu.
+- `variants`: seed của biến thể từng câu – tái tạo được đúng đề người đó đã làm, và kiểm tra các biến thể cùng khuôn có khó ngang nhau không.
 - `attempt`: lần làm thứ mấy trên trình duyệt này. Khi chuẩn hoá chỉ dùng lần đầu, để tránh hiệu ứng luyện tập.
 - **Không** gửi tên, email hay IP. Server cũng không ghi IP vào log, và thời gian chỉ lưu đến phút.
 - Muốn tắt thu thập: đặt `collectUrl: ''` trong `js/config.js`. Khi đó ô đồng ý cũng ẩn đi.
@@ -110,6 +114,27 @@ python tools/calibrate.py --input data/sim.jsonl --output data/params.sim.js --m
 
 **Quan trọng:** khi sửa nội dung hoặc đáp án một câu, hãy tăng `QUESTION_BANK_VERSION` trong `js/questions.js`. Như vậy dữ liệu cũ không bị trộn với dữ liệu mới, và `params.js` của phiên bản cũ tự động bị bỏ qua.
 
-## Thêm câu hỏi
+## Ngân hàng câu hỏi và kiểm tra tự động
 
-Thêm object vào `js/questions.js` với `id`, `domain`, `b` (độ khó, khoảng −3…3), `a` (độ phân biệt, khoảng 1,2–2), `options` và `answer`. Sau đó tăng `QUESTION_BANK_VERSION`.
+Mỗi câu trong `js/questions.js` là một **khuôn** `make(rng)`: giữ nguyên quy luật và độ khó, nhưng mỗi lần làm bài sinh ra số liệu, hình, tên khác nhau. Dãy số, logic và ma trận hình được sinh ngẫu nhiên; ngôn ngữ chọn từ 8 phiên bản viết sẵn. Trình duyệt nhớ những biến thể đã gặp để lần sau không ra lại. Trang kết quả **không** hiện đáp án.
+
+**Bắt buộc chạy trước mỗi lần deploy khi sửa câu hỏi:**
+
+```bash
+node tools/validate_items.js --n 10000 --forms 5000
+```
+
+Công cụ sinh hàng chục nghìn biến thể và hàng nghìn bộ đề, rồi kiểm tra:
+
+| Nhóm | Kiểm tra |
+|---|---|
+| Độ chính xác | Bộ giải **độc lập** đọc đề hiển thị và tự tìm đáp án (dãy số theo quy luật; logic bằng vét cạn bảng chân trị / hoán vị; ma trận suy từ 8 ô). Dãy số còn được thử với 12 quy luật phổ biến khác – nếu quy luật khác cũng khớp và ra một phương án nhiễu thì báo **mơ hồ**. |
+| Cấu trúc | Số phương án, không trùng, đáp án nằm trong phương án, hình hợp lệ |
+| Vị trí đáp án | A/B/C… phân bố đều trên toàn bộ; trong một bộ đề chênh lệch ≤ 4, không 3 câu liền cùng vị trí |
+| Giá trị đáp án | Không giá trị nào chiếm quá nhiều trong một khuôn; ít bộ đề có cùng đáp án số lặp ≥ 3 lần |
+| Mẹo đoán | Thứ hạng đáp án số (không thường là lớn/nhỏ nhất), mẹo "chọn số ở giữa", "chọn câu dài nhất", "chọn hình giống các hình khác nhất", phương án "không xác định" không được luôn sai |
+| Làm lại | 3 lần làm liên tiếp không gặp lại câu y hệt |
+
+Thoát với mã 1 nếu có lỗi.
+
+**Thêm khuôn mới:** thêm object có `id`, `domain`, `b`, `a`, `make(rng)` vào `js/questions.js`. Thêm bộ giải tương ứng vào `tools/validate_items.js`, chạy công cụ kiểm tra cho tới khi không còn lỗi, rồi tăng `QUESTION_BANK_VERSION`.

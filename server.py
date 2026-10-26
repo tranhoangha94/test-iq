@@ -63,6 +63,15 @@ def clean_record(raw):
         if k in responses and isinstance(v, str)
     }
 
+    # Mã biến thể (seed) của từng câu – để kiểm tra các biến thể cùng khuôn có khó ngang nhau không
+    variants = raw.get("variants") or {}
+    if not isinstance(variants, dict):
+        raise ValueError("invalid variants")
+    variants = {
+        k: v for k, v in variants.items()
+        if k in responses and isinstance(v, int) and not isinstance(v, bool) and 0 <= v < 2**32
+    }
+
     def int_in(name, lo, hi, default=None):
         v = raw.get(name, default)
         if not isinstance(v, int) or isinstance(v, bool) or not lo <= v <= hi:
@@ -78,6 +87,7 @@ def clean_record(raw):
         "timeLimit": int_in("timeLimit", 1, 24 * 3600, 2100),
         "responses": responses,
         "choices": choices,
+        "variants": variants,
     }
 
 

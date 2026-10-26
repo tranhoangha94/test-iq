@@ -58,6 +58,9 @@ Ghi chú lâm sàng: theo DSM-5 và ICD-11, IQ < 70 chỉ là **một** tiêu ch
 4. **Chuẩn tuổi:** `z = θ − μ_tuổi`, trong đó μ_tuổi được nội suy từ đường cong phát triển và suy giảm của suy luận lưu động (đỉnh ở 20–34 tuổi).
 5. **IQ = 100 + 15z**, giới hạn trong 40–160. Bách phân vị = Φ(z). Khoảng tin cậy 95% = IQ ± 1,96 × 15 × SE.
 6. Quy đổi thêm sang thang SD 16 và SD 24.
+7. **Sinh câu hỏi tự động** (Automatic Item Generation – Gierl & Haladyna 2013): mỗi câu là một khuôn có quy luật và độ khó cố định, mỗi lần làm sinh biến thể mới. Mọi biến thể của một khuôn dùng chung tham số IRT (giả định *đồng dạng* – isomorph). Mỗi bài nộp lưu seed của biến thể để kiểm chứng giả định này khi có dữ liệu.
+8. **Kiểm soát sai lệch** (`tools/validate_items.js`): vị trí đáp án cân bằng trong từng bộ đề; phương án nhiễu của câu số được chọn để thứ hạng đáp án phân bố đều; phương án nhiễu của ma trận theo phương pháp RAVEN-FAIR (Benny và cộng sự, 2021) cộng thêm bước chọn tập phương án để mẹo "chọn hình giống nhất" chỉ đúng ở mức đoán mò.
+9. **Hiệu ứng luyện tập:** làm lại thường cao hơn 5–8 điểm dù câu hỏi khác (Calamia và cộng sự, 2012). Trang kết quả cảnh báo từ lần làm thứ 2; khi chuẩn hoá chỉ dùng lần làm đầu.
 
 Kiểm tra mô phỏng (người 22 tuổi, đúng N câu dễ nhất): 0 → 57 · 20 → 107 · 30 → 124 · 35 → 132 · 40 → 141 · 45 → 156.
 

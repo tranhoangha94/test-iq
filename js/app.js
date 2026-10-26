@@ -2,10 +2,10 @@
   'use strict';
 
   const TIME_LIMIT = 45 * 60; // giây
-  const STORE_KEY = 'iqtest.progress.v1';
+  const STORE_KEY = 'iqtest.progress.v3';
   const ATTEMPTS_KEY = 'iqtest.attempts';
+  const SEEN_KEY = 'iqtest.seen';
   const BANK = window.QUESTION_BANK_VERSION;
-  const PARAMS = window.IQ_PARAMS && window.IQ_PARAMS.bank === BANK ? window.IQ_PARAMS.items : {};
   const DOMAINS = { number: 'Suy luận số', verbal: 'Ngôn ngữ', logic: 'Logic', spatial: 'Ma trận hình' };
   const LETTERS = 'ABCDEF';
   const { BANDS } = window.IQScore;
@@ -62,41 +62,36 @@
   // ───────── Trạng thái bài làm ─────────
   let state = null, tick = null;
 
-  function shuffle(arr) {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-    return a;
+  function readJSON(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; }
+  }
+  function writeJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* bộ nhớ trình duyệt không khả dụng */ }
   }
 
-  // Câu hỏi được sắp xếp từ dễ đến khó, thứ tự phương án được xáo trộn mỗi lần làm
-  function prepareItems(orders) {
-    return window.QUESTIONS.slice().sort((x, y) => x.b - y.b).map((q, i) => {
-      let opts, correct;
-      if (q.type === 'matrix') {
-        opts = [q.gen(2, 2), ...q.distractors].map((s, j) => ({ key: 'o' + j, html: renderCell(s) }));
-        correct = 'o0';
-      } else {
-        opts = q.options.map(o => ({ key: String(o), html: esc(o) }));
-        correct = String(q.answer);
-      }
-      const order = orders ? orders[i] : shuffle(opts.map(o => o.key));
-      // Tham số IRT đã chuẩn hoá từ dữ liệu thực (nếu có) thay cho ước lượng ban đầu
-      const p = PARAMS[q.id] || {};
-      return { ...q, a: p.a || q.a, b: p.b !== undefined ? p.b : q.b, k: opts.length, correct, order, opts: order.map(k => opts.find(o => o.key === k)) };
-    });
+  /*
+   * Sinh bộ đề mới (mỗi câu một biến thể chưa gặp) hoặc khôi phục bộ đề đang làm dở.
+   * Câu hỏi sắp xếp từ dễ đến khó; vị trí đáp án được cân bằng trong js/form.js.
+   */
+  function prepareItems(saved) {
+    const { items, seen } = window.IQForm.build({ seen: readJSON(SEEN_KEY, {}), saved: saved && { seeds: saved.seeds, orders: saved.orders } });
+    if (!saved) writeJSON(SEEN_KEY, seen);
+    items.forEach(q => q.opts.forEach(o => { o.html = q.type === 'matrix' ? renderCell(o.spec) : esc(o.label); }));
+    return items;
   }
 
   function save() {
     if (!state) return;
-    try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ age: state.age, consent: state.consent, answers: state.answers, idx: state.idx, start: state.start, orders: state.items.map(q => q.order) }));
-    } catch (e) { /* bộ nhớ trình duyệt không khả dụng */ }
+    writeJSON(STORE_KEY, {
+      age: state.age, consent: state.consent, answers: state.answers, idx: state.idx, start: state.start,
+      seeds: state.items.map(q => q.seed), orders: state.items.map(q => q.order),
+    });
   }
   function clearSaved() { try { localStorage.removeItem(STORE_KEY); } catch (e) { /* bỏ qua */ } }
   function loadSaved() {
     try {
       const d = JSON.parse(localStorage.getItem(STORE_KEY));
-      if (d && d.age && Date.now() - d.start < TIME_LIMIT * 1000 && d.orders.length === window.QUESTIONS.length) return d;
+      if (d && d.age && d.seeds && Date.now() - d.start < TIME_LIMIT * 1000 && d.seeds.length === window.QUESTIONS.length) return d;
     } catch (e) { /* bỏ qua */ }
     return null;
   }
@@ -109,7 +104,7 @@
   }
 
   function startTest(saved, age, consent) {
-    const items = prepareItems(saved && saved.orders);
+    const items = prepareItems(saved);
     state = {
       items,
       age: saved ? saved.age : age,
@@ -220,9 +215,11 @@
       return { name: DOMAINS[d], total: idx.length, right: idx.filter(i => resp[i]).length };
     });
     clearSaved();
-    submitAnonymous(items, answers, res.elapsed);
+    res.attempt = (parseInt(readJSON(ATTEMPTS_KEY, 0), 10) || 0) + 1;
+    writeJSON(ATTEMPTS_KEY, res.attempt);
+    submitAnonymous(items, answers, res.elapsed, res.attempt);
     $('#nav-cta').textContent = 'Làm lại';
-    renderResult(res, items, resp);
+    renderResult(res);
     state = null;
     show('result');
     window.scrollTo(0, 0);
@@ -230,23 +227,18 @@
 
   /*
    * Gửi kết quả ẩn danh để chuẩn hoá lại tham số IRT (tools/calibrate.py).
-   * Chỉ gồm: tuổi, đúng/sai/bỏ trống từng câu, phương án đã chọn, thời gian, lần làm thứ mấy.
+   * Chỉ gồm: tuổi, đúng/sai/bỏ trống từng câu, phương án đã chọn, mã biến thể (seed), thời gian, lần làm thứ mấy.
    */
-  function submitAnonymous(items, answers, elapsed) {
-    let attempt = 1;
-    try {
-      attempt = (parseInt(localStorage.getItem(ATTEMPTS_KEY), 10) || 0) + 1;
-      localStorage.setItem(ATTEMPTS_KEY, String(attempt));
-    } catch (e) { /* bỏ qua */ }
-
+  function submitAnonymous(items, answers, elapsed, attempt) {
     const url = window.IQ_CONFIG.collectUrl;
     if (!url || !state.consent) return;
-    const responses = {}, choices = {};
+    const responses = {}, choices = {}, variants = {};
     items.forEach((q, i) => {
       responses[q.id] = answers[i] === null ? null : answers[i] === q.correct ? 1 : 0;
       if (answers[i] !== null) choices[q.id] = answers[i];
+      variants[q.id] = q.seed;
     });
-    const body = JSON.stringify({ bank: BANK, age: state.age, attempt, elapsed, timeLimit: TIME_LIMIT, responses, choices });
+    const body = JSON.stringify({ bank: BANK, age: state.age, attempt, elapsed, timeLimit: TIME_LIMIT, responses, choices, variants });
     try {
       // text/plain để không phát sinh preflight CORS khi gửi tới endpoint khác domain (VD Google Apps Script)
       fetch(url, { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' } }).catch(() => {});
@@ -282,7 +274,8 @@
     </svg>`;
   }
 
-  function renderResult(res, items, resp) {
+  // Đáp án và lời giải KHÔNG được hiển thị, để câu hỏi không bị lộ khi làm lại hoặc chia sẻ
+  function renderResult(res) {
     const b = res.band;
     const better = res.percentile;
     const rarity = Math.abs(res.z) >= 1 ? `Cứ khoảng <strong>${Math.round(res.rarity).toLocaleString('vi-VN')}</strong> người mới có 1 người đạt mức ${res.z > 0 ? 'này trở lên' : 'này trở xuống'}.` : 'Bạn thuộc nhóm phổ biến nhất của dân số.';
@@ -302,16 +295,10 @@
         <div class="dom-bar"><div style="width:${(d.right / d.total) * 100}%"></div></div>
       </div>`).join('');
 
-    const review = items.map((q, i) => {
-      const right = q.opts.find(o => o.key === q.correct);
-      const title = q.type === 'matrix' ? 'Ma trận hình' : q.seq ? q.seq.join(', ') + ', ?' : q.prompt;
-      return `<li class="${resp[i] ? 'ok' : 'no'}">
-        <span class="rv-mark">${resp[i] ? '✓' : '✕'}</span>
-        <span class="rv-q"><b>Câu ${i + 1}.</b> ${esc(title)}</span>
-        <span class="rv-a ${q.type === 'matrix' ? 'rv-fig' : ''}">${right.html}</span>
-        ${q.explain ? `<span class="rv-ex">${esc(q.explain)}</span>` : ''}
-      </li>`;
-    }).join('');
+    // Làm lại: câu hỏi đã đổi mới nhưng người làm đã quen dạng bài (hiệu ứng luyện tập)
+    const retest = res.attempt > 1
+      ? `<p class="r-retest"><strong>Đây là lần làm thứ ${res.attempt}.</strong> Câu hỏi mỗi lần đều được sinh mới, nhưng khi đã quen dạng bài, điểm thường cao hơn lần đầu khoảng 5–8 điểm. Kết quả lần đầu phản ánh chính xác nhất; nên cách nhau ít nhất vài tháng giữa hai lần làm.</p>`
+      : '';
 
     $('#result').innerHTML = `
       <section class="r-hero" style="--c:${b.color}">
@@ -326,6 +313,7 @@
         </div>
         <p class="r-rarity">${rarity}</p>
         <p class="r-age">Chuẩn so sánh: nhóm <strong>${res.ageGroup}</strong>${res.adultIq !== res.iq ? ` · Nếu so với người trưởng thành 20–34 tuổi: <strong>${res.adultIq}</strong>` : ''}</p>
+        ${retest}
       </section>
 
       <section class="r-card">
@@ -350,11 +338,6 @@
           </table>
         </section>
       </div>
-
-      <details class="r-card review">
-        <summary>Xem đáp án từng câu</summary>
-        <ul>${review}</ul>
-      </details>
 
       <div class="r-actions">
         <button class="btn btn-yellow btn-lg" data-action="restart">Làm lại bài test</button>

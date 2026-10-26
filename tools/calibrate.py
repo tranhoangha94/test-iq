@@ -40,7 +40,7 @@ def load_bank():
     js = (
         "global.window={};require(process.argv[1]);"
         "console.log(JSON.stringify({bank:window.QUESTION_BANK_VERSION,items:window.QUESTIONS.map(q=>("
-        "{id:q.id,domain:q.domain,a:q.a,b:q.b,k:q.type==='matrix'?q.distractors.length+1:q.options.length}))}))"
+        "{id:q.id,domain:q.domain,a:q.a,b:q.b,k:q.k}))}))"
     )
     try:
         out = subprocess.run(["node", "-e", js, os.path.join(ROOT, "js", "questions.js")],

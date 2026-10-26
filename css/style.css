@@ -227,6 +227,8 @@ kbd { font-family: inherit; background: var(--bg-soft); border-radius: 5px; padd
 .r-rarity { margin-top: 24px; font-size: 15px; }
 .r-age { margin-top: 8px; font-size: 14px; color: var(--ink-2); }
 .r-age strong { color: var(--ink); }
+.r-retest { margin: 20px auto 0; max-width: 620px; font-size: 14px; background: var(--surface); border-radius: 14px; padding: 14px 18px; text-align: left; color: var(--ink-2); }
+.r-retest strong { color: var(--ink); }
 
 .r-card { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 28px; }
 .r-card h3 { font-size: 20px; margin-bottom: 20px; }
@@ -265,16 +267,6 @@ kbd { font-family: inherit; background: var(--bg-soft); border-radius: 5px; padd
 .conv { width: 100%; border-collapse: collapse; font-size: 15px; }
 .conv td { padding: 10px 0; border-bottom: 1px solid var(--line); }
 .conv td:last-child { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
-
-.review summary { cursor: pointer; font-weight: 500; font-size: 18px; letter-spacing: -0.02em; }
-.review ul { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 6px; }
-.review li { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--bg-soft); font-size: 14px; }
-.rv-mark { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
-.ok .rv-mark { background: #c8f560; }
-.no .rv-mark { background: #ff6a3d; color: #fff; }
-.rv-a { font-weight: 600; text-align: right; }
-.rv-fig { width: 48px; height: 48px; background: var(--surface); border-radius: 8px; }
-.rv-ex { grid-column: 2 / -1; color: var(--ink-2); font-size: 13px; line-height: 1.5; }
 
 .r-actions { display: flex; gap: 12px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
 
