@@ -51,6 +51,9 @@ Nếu đồng ý, khi nộp bài trình duyệt gửi:
 | Volume | mount tại `/data` | Lưu `results.jsonl` bền vững qua các lần deploy |
 | `DATA_DIR` | `/data` | Thư mục dữ liệu |
 | `EXPORT_TOKEN` | chuỗi bí mật (xem tab Variables trên Railway) | Bật endpoint tải dữ liệu |
+| `ALLOWED_ORIGINS` | `https://test-iq-soon.vercel.app` | Domain frontend khác được gửi kết quả (CORS), cách nhau bởi dấu phẩy |
+
+Frontend cũng được host trên Vercel (https://test-iq-soon.vercel.app). `js/config.js` tự gửi kết quả sang Railway khi trang không chạy trên chính domain Railway. Khi đổi domain Railway, sửa `API_ORIGIN` trong `js/config.js`. Khi thêm domain frontend mới, thêm nó vào `ALLOWED_ORIGINS`.
 
 Deploy lại sau khi sửa code:
 

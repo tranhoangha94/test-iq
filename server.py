@@ -11,6 +11,7 @@ Biến môi trường (dùng khi deploy, VD Railway):
   PORT          cổng lắng nghe (khi có, server nghe trên 0.0.0.0)
   DATA_DIR      thư mục lưu dữ liệu, nên trỏ vào volume bền vững (mặc định ./data)
   EXPORT_TOKEN  bật /api/export; để trống thì tắt
+  ALLOWED_ORIGINS  domain frontend khác được phép gửi kết quả (CORS), VD https://test-iq-soon.vercel.app
 """
 import argparse
 import hmac
@@ -21,10 +22,13 @@ import re
 import threading
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(os.environ.get("DATA_DIR") or os.path.join(ROOT, "data"), "results.jsonl")
 EXPORT_TOKEN = os.environ.get("EXPORT_TOKEN", "")
+# Các domain frontend được phép gửi kết quả (VD frontend host trên Vercel), cách nhau bởi dấu phẩy
+ALLOWED_ORIGINS = {o.strip().rstrip("/") for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()}
 MAX_BODY = 32 * 1024
 ID_RE = re.compile(r"^[a-z0-9_-]{1,32}$")
 _write_lock = threading.Lock()
@@ -92,9 +96,38 @@ class Handler(SimpleHTTPRequestHandler):
             return
         super().do_GET()
 
+    def _origin_allowed(self):
+        """Không có Origin (curl, server khác) hoặc cùng domain, hoặc nằm trong ALLOWED_ORIGINS."""
+        origin = self.headers.get("Origin")
+        if not origin:
+            return True
+        return origin in ALLOWED_ORIGINS or urlsplit(origin).netloc == self.headers.get("Host", "")
+
+    def end_headers(self):
+        # send_error có thể gọi trước khi request được phân tích xong
+        headers = getattr(self, "headers", None)
+        origin = headers.get("Origin") if headers else None
+        if origin and getattr(self, "path", "").startswith("/api/") and self._origin_allowed():
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        if self.path.split("?", 1)[0] != "/api/results" or not self._origin_allowed():
+            self.send_error(404)
+            return
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "86400")
+        self.end_headers()
+
     def do_POST(self):
         if self.path.split("?", 1)[0] != "/api/results":
             self.send_error(404)
+            return
+        if not self._origin_allowed():
+            self._reply(403, {"ok": False, "error": "origin not allowed"})
             return
         try:
             length = int(self.headers.get("Content-Length") or 0)
