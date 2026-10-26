@@ -3,10 +3,17 @@ Server cho website trắc nghiệm IQ: phục vụ file tĩnh và nhận kết q
 
     python server.py [--port 5173] [--host 127.0.0.1]
 
-POST /api/results  → nối thêm 1 dòng JSON vào data/results.jsonl
+POST /api/results  → nối thêm 1 dòng JSON vào <DATA_DIR>/results.jsonl
+GET  /api/export   → tải toàn bộ results.jsonl (cần header "Authorization: Bearer <EXPORT_TOKEN>")
 Không lưu địa chỉ IP hay bất kỳ thông tin định danh nào.
+
+Biến môi trường (dùng khi deploy, VD Railway):
+  PORT          cổng lắng nghe (khi có, server nghe trên 0.0.0.0)
+  DATA_DIR      thư mục lưu dữ liệu, nên trỏ vào volume bền vững (mặc định ./data)
+  EXPORT_TOKEN  bật /api/export; để trống thì tắt
 """
 import argparse
+import hmac
 import json
 import os
 import sys
@@ -16,7 +23,8 @@ from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(ROOT, "data", "results.jsonl")
+DATA_FILE = os.path.join(os.environ.get("DATA_DIR") or os.path.join(ROOT, "data"), "results.jsonl")
+EXPORT_TOKEN = os.environ.get("EXPORT_TOKEN", "")
 MAX_BODY = 32 * 1024
 ID_RE = re.compile(r"^[a-z0-9_-]{1,32}$")
 _write_lock = threading.Lock()
@@ -76,6 +84,9 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         # Không cho tải dữ liệu thô và mã nguồn server qua web
         path = self.path.split("?", 1)[0]
+        if path == "/api/export":
+            self._export()
+            return
         if path.startswith("/data") or path.startswith("/tools") or path.startswith("/.") or path.endswith(".py"):
             self.send_error(404)
             return
@@ -103,6 +114,22 @@ class Handler(SimpleHTTPRequestHandler):
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
         self._reply(201, {"ok": True})
 
+    def _export(self):
+        auth = self.headers.get("Authorization", "")
+        if not EXPORT_TOKEN or not hmac.compare_digest(auth.encode(), f"Bearer {EXPORT_TOKEN}".encode()):
+            self.send_error(404)
+            return
+        body = b""
+        if os.path.exists(DATA_FILE):
+            with _write_lock, open(DATA_FILE, "rb") as f:
+                body = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+        self.send_header("Content-Disposition", 'attachment; filename="results.jsonl"')
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def _reply(self, code, payload):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(code)
@@ -113,18 +140,19 @@ class Handler(SimpleHTTPRequestHandler):
 
     def log_message(self, fmt, *args):
         # Ghi log không kèm địa chỉ IP
-        print(f"[{self.log_date_time_string()}] {fmt % args}")
+        print(f"[{self.log_date_time_string()}] {fmt % args}", flush=True)
 
 
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=5173)
+    env_port = os.environ.get("PORT")
+    ap.add_argument("--host", default="0.0.0.0" if env_port else "127.0.0.1")
+    ap.add_argument("--port", type=int, default=int(env_port or 5173))
     args = ap.parse_args()
     server = ThreadingHTTPServer((args.host, args.port), Handler)
-    print(f"Serving on http://{args.host}:{args.port}  (dữ liệu: {DATA_FILE})")
+    print(f"Serving on http://{args.host}:{args.port}  (dữ liệu: {DATA_FILE})", flush=True)
     server.serve_forever()
 
 

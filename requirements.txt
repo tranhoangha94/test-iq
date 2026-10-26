@@ -1,0 +1,1 @@
+# server.py chỉ dùng thư viện chuẩn của Python — file này để Railway nhận diện dự án Python.

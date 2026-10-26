@@ -42,6 +42,34 @@ Nếu đồng ý, khi nộp bài trình duyệt gửi:
 - **Không** gửi tên, email hay IP. Server cũng không ghi IP vào log, và thời gian chỉ lưu đến phút.
 - Muốn tắt thu thập: đặt `collectUrl: ''` trong `js/config.js`. Khi đó ô đồng ý cũng ẩn đi.
 
+### Deploy lên Railway (đang dùng)
+
+`railway.json` chạy `python server.py`. Server tự nghe trên `$PORT`. Cấu hình service `web`:
+
+| Biến / tài nguyên | Giá trị | Ý nghĩa |
+|---|---|---|
+| Volume | mount tại `/data` | Lưu `results.jsonl` bền vững qua các lần deploy |
+| `DATA_DIR` | `/data` | Thư mục dữ liệu |
+| `EXPORT_TOKEN` | chuỗi bí mật (xem tab Variables trên Railway) | Bật endpoint tải dữ liệu |
+
+Deploy lại sau khi sửa code:
+
+```bash
+railway up
+```
+
+Tải dữ liệu về máy rồi chuẩn hoá (thay `<TOKEN>` và `<domain>`):
+
+```bash
+curl -H "Authorization: Bearer <TOKEN>" https://<domain>/api/export -o data/results.jsonl
+```
+
+```bash
+python tools/calibrate.py
+```
+
+Sau đó commit `js/params.js` và chạy `railway up`.
+
 ### Khi host tĩnh (Netlify, Vercel, GitHub Pages)
 
 Các host tĩnh không chạy được `server.py`, nên cần trỏ `collectUrl` tới một endpoint nhận POST. Đơn giản nhất là dùng **Google Apps Script** gắn với một Google Sheet:
