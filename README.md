@@ -27,6 +27,8 @@ Mở http://localhost:5173. Server vừa phục vụ website, vừa nhận kết
 | `tools/calibrate.py` | Chuẩn hoá lại tham số IRT và chuẩn tuổi từ dữ liệu thu được |
 | `tools/simulate.py` | Tạo dữ liệu giả lập để kiểm tra `calibrate.py` |
 | `tools/validate_items.js` | Kiểm tra tự động độ chính xác và sai lệch của ngân hàng câu hỏi |
+| `dev.html`, `js/dev/questions.js`, `js/dev/app.js` | Test thuật toán cho lập trình viên (30 khuôn, code JS/Python) |
+| `tools/validate_dev.js` | Kiểm tra bài thuật toán: chạy thật code JS và Python, đo độ phức tạp, đo sai lệch |
 
 ## Thu thập kết quả ẩn danh
 
@@ -138,3 +140,20 @@ Công cụ sinh hàng chục nghìn biến thể và hàng nghìn bộ đề, r�
 Thoát với mã 1 nếu có lỗi.
 
 **Thêm khuôn mới:** thêm object có `id`, `domain`, `b`, `a`, `make(rng)` vào `js/questions.js`. Thêm bộ giải tương ứng vào `tools/validate_items.js`, chạy công cụ kiểm tra cho tới khi không còn lỗi, rồi tăng `QUESTION_BANK_VERSION`.
+
+## Test thuật toán cho developer (`dev.html`)
+
+30 câu, 40 phút, 6 chủ đề: độ phức tạp, cấu trúc dữ liệu, đọc code, sắp xếp & tìm kiếm, đệ quy & quy hoạch động, đồ thị. Code hiển thị bằng JavaScript hoặc Python (người làm tự chọn). Mỗi câu là một khuôn sinh mới mỗi lần làm; vị trí đáp án cân bằng bằng cùng module `js/form.js`. Kết quả là cấp độ Intern / Junior / Mid-level / Senior / Expert (theo năng lực IRT θ), kèm điểm theo chủ đề và lời giải từng câu.
+
+Kiểm tra trước mỗi lần deploy khi sửa câu hỏi (cần Node.js và Python):
+
+```bash
+node tools/validate_dev.js --n 2000 --forms 3000 --py 40
+```
+
+- Câu "code in ra gì": chạy thật bản JavaScript và so với đáp án; chạy thật bản Python (mẫu) và so với kết quả JS.
+- Câu độ phức tạp: chạy f(n) với n = 256…4096 (và n = 12, 18 để nhận ra hàm mũ), tìm lớp Big-O khớp nhất với số thao tác đo được.
+- Câu heap, BST, đồ thị: giải lại bằng cách cài đặt khác (heap nhị phân thật, DFS bằng ngăn xếp, Bellman-Ford thay cho Dijkstra…).
+- Sai lệch: vị trí đáp án, giá trị đáp án lặp lại, thứ hạng đáp án số, đáp án dài nhất.
+
+Bài thuật toán hiện chưa thu thập kết quả, nên cấp độ dựa trên độ khó dự kiến của từng câu.

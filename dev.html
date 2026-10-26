@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test thuật toán</title>
+  <meta name="description" content="Bài trắc nghiệm tư duy thuật toán cho lập trình viên: 30 câu, code JavaScript hoặc Python, sinh mới mỗi lần làm.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="dev">
+  <header class="nav-wrap">
+    <nav class="nav">
+      <a class="logo" href="index.html">iq<span>.</span>test</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-switch">IQ Test</a>
+        <a href="dev.html" class="is-active">Test thuật toán <span class="nav-badge">Dev</span></a>
+        <a href="#levels" data-go="intro">Cấp độ</a>
+      </div>
+      <div class="nav-status" id="nav-status" hidden>
+        <span class="timer" id="timer">40:00</span>
+      </div>
+      <button class="btn btn-yellow btn-sm" data-action="start" id="nav-cta">Làm bài ngay</button>
+    </nav>
+  </header>
+
+  <!-- ═════════ GIỚI THIỆU ═════════ -->
+  <main id="screen-intro" class="screen">
+    <section class="hero">
+      <p class="eyebrow">Dành cho lập trình viên</p>
+      <h1>Test tư duy thuật toán<br>trong 40 phút</h1>
+      <p class="lead">30 câu về độ phức tạp, cấu trúc dữ liệu, đọc code, sắp xếp, quy hoạch động và đồ thị. Code hiển thị bằng JavaScript hoặc Python. Mỗi lần làm là một bộ đề mới.</p>
+      <button class="btn btn-yellow btn-lg" data-action="start">Bắt đầu làm bài</button>
+      <ul class="hero-stats">
+        <li><strong>30</strong><span>câu hỏi</span></li>
+        <li><strong>40′</strong><span>thời gian</span></li>
+        <li><strong>6</strong><span>chủ đề</span></li>
+        <li><strong>JS · Py</strong><span>ngôn ngữ</span></li>
+      </ul>
+    </section>
+
+    <section class="domains domains-6">
+      <article class="tile t-blue"><span class="tile-k">01</span><h3>Độ phức tạp</h3><p>Big-O của vòng lặp và đệ quy.</p></article>
+      <article class="tile t-pink"><span class="tile-k">02</span><h3>Cấu trúc dữ liệu</h3><p>Stack, queue, hash, heap, BST.</p></article>
+      <article class="tile t-green"><span class="tile-k">03</span><h3>Đọc code</h3><p>Đoạn code này in ra gì?</p></article>
+      <article class="tile t-orange"><span class="tile-k">04</span><h3>Sắp xếp &amp; tìm kiếm</h3><p>Bubble, insertion, partition, binary search.</p></article>
+      <article class="tile t-yellow"><span class="tile-k">05</span><h3>Đệ quy &amp; QHĐ</h3><p>Leo thang, đổi tiền, LCS, cây đệ quy.</p></article>
+      <article class="tile t-dark"><span class="tile-k">06</span><h3>Đồ thị</h3><p>BFS, DFS, liên thông, Dijkstra.</p></article>
+    </section>
+
+    <section class="band-section" id="levels">
+      <p class="eyebrow">Cấp độ</p>
+      <h2>Từ Intern đến Expert</h2>
+      <p class="section-lead">Cấp độ được tính từ năng lực ước lượng bằng mô hình IRT – câu khó làm đúng được tính nhiều hơn câu dễ, đoán mò bị trừ hao.</p>
+      <div class="band-grid band-grid-5" id="level-grid"></div>
+    </section>
+
+    <section class="method">
+      <p class="eyebrow">Phương pháp</p>
+      <h2>Câu hỏi được kiểm chứng thế nào?</h2>
+      <div class="method-grid">
+        <article class="m-card">
+          <span class="m-step">1</span>
+          <h3>Sinh mới mỗi lần làm</h3>
+          <p>Mỗi câu là một khuôn: mảng, tham số, đồ thị được sinh ngẫu nhiên. Làm lại không thể nhớ đáp án, chỉ có thể hiểu thuật toán.</p>
+          <code>30 khuôn × hàng nghìn biến thể</code>
+        </article>
+        <article class="m-card">
+          <span class="m-step">2</span>
+          <h3>Chạy thật để kiểm đáp án</h3>
+          <p>Mọi đoạn code được chạy thật bằng JavaScript và Python để đối chiếu đáp án; độ phức tạp được đo thực nghiệm; câu đồ thị được giải lại bằng thuật toán khác.</p>
+          <code>node tools/validate_dev.js</code>
+        </article>
+      </div>
+      <p class="disclaimer">Cấp độ là ước lượng tham khảo dựa trên độ khó dự kiến của từng câu, chưa chuẩn hoá trên dữ liệu lập trình viên thực tế.</p>
+    </section>
+
+    <footer class="foot">© iq.test — Test thuật toán tham khảo.</footer>
+  </main>
+
+  <!-- ═════════ LÀM BÀI ═════════ -->
+  <main id="screen-test" class="screen" hidden>
+    <div class="test-wrap">
+      <div class="test-top">
+        <span class="q-count" id="q-count">Câu 1 / 30</span>
+        <span class="chip" id="q-domain"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+
+      <article class="q-card" id="q-card"></article>
+
+      <div class="test-actions">
+        <button class="btn btn-ghost" id="btn-prev">← Câu trước</button>
+        <button class="btn btn-dark" id="btn-next">Câu tiếp →</button>
+      </div>
+
+      <div class="palette-wrap">
+        <div class="palette" id="palette"></div>
+        <button class="btn btn-yellow" id="btn-submit">Nộp bài</button>
+      </div>
+      <p class="kbd-hint">Phím tắt: <kbd>1</kbd>–<kbd>5</kbd> chọn đáp án · <kbd>←</kbd> <kbd>→</kbd> chuyển câu</p>
+    </div>
+  </main>
+
+  <!-- ═════════ KẾT QUẢ ═════════ -->
+  <main id="screen-result" class="screen" hidden>
+    <div class="result-wrap" id="result"></div>
+  </main>
+
+  <dialog id="confirm" class="dialog">
+    <h3>Nộp bài?</h3>
+    <p id="confirm-text"></p>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" id="confirm-cancel">Làm tiếp</button>
+      <button class="btn btn-yellow" id="confirm-ok">Nộp bài</button>
+    </div>
+  </dialog>
+
+  <script src="js/dev/questions.js"></script>
+  <script src="js/form.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/dev/app.js"></script>
+</body>
+</html>

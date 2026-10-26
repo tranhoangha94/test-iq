@@ -114,6 +114,9 @@ class Handler(SimpleHTTPRequestHandler):
         return origin in ALLOWED_ORIGINS or urlsplit(origin).netloc == self.headers.get("Host", "")
 
     def end_headers(self):
+        # Luôn kiểm tra lại với server, để người dùng không bị kẹt ở HTML/JS cũ sau mỗi lần deploy
+        if self.command in ("GET", "HEAD"):
+            self.send_header("Cache-Control", "no-cache")
         # send_error có thể gọi trước khi request được phân tích xong
         headers = getattr(self, "headers", None)
         origin = headers.get("Origin") if headers else None

@@ -13,14 +13,14 @@
   function variantKey(q, v) {
     const body = q.type === 'matrix'
       ? [0, 1, 2, 3, 4, 5, 6, 7].map(i => root.IQ_CANON(v.gen(Math.floor(i / 3), i % 3))).join('|')
-      : `${v.prompt}|${v.seq ? v.seq.join(',') : ''}|${v.answer}`;
+      : `${v.prompt}|${v.seq ? v.seq.join(',') : ''}|${v.code ? v.code.js : ''}|${v.answer}`;
     let h = 2166136261; // FNV-1a
     for (let i = 0; i < body.length; i++) { h ^= body.charCodeAt(i); h = Math.imul(h, 16777619); }
     return (h >>> 0).toString(36);
   }
 
-  function makeVariant(q, seed) {
-    const v = q.make(root.IQ_RNG(seed));
+  function makeVariant(q, seed, rngFn = root.IQ_RNG) {
+    const v = q.make(rngFn(seed));
     let opts, correct;
     if (q.type === 'matrix') {
       opts = [v.gen(2, 2), ...v.distractors].map((spec, j) => ({ key: 'o' + j, spec }));
@@ -33,28 +33,29 @@
   }
 
   /*
-   * build({ rand, seen, saved })
+   * build({ rand, seen, saved, questions, rngFn, bank, params })
+   *  questions/rngFn/bank/params : ngân hàng câu hỏi (mặc định là bài IQ)
    *  rand  : hàm ngẫu nhiên [0, 1)
    *  seen  : { [id]: [variantKey…] } các biến thể đã gặp
    *  saved : { seeds, orders } để khôi phục bộ đề đang làm dở
    * Trả về { items, seen } (seen đã cập nhật).
    */
-  function build({ rand = Math.random, seen = {}, saved = null } = {}) {
-    const qs = root.QUESTIONS.slice().sort((x, y) => x.b - y.b);
-    const params = root.IQ_PARAMS && root.IQ_PARAMS.bank === root.QUESTION_BANK_VERSION ? root.IQ_PARAMS.items : {};
+  function build({ rand = Math.random, seen = {}, saved = null, questions = root.QUESTIONS, rngFn = root.IQ_RNG, bank = root.QUESTION_BANK_VERSION, params: allParams = root.IQ_PARAMS } = {}) {
+    const qs = questions.slice().sort((x, y) => x.b - y.b);
+    const params = allParams && allParams.bank === bank ? allParams.items : {};
     const nextSeen = { ...seen };
     const answerCount = new Map(); // số lần mỗi đáp án (dạng chữ/số) đã xuất hiện trong bộ đề
     const made = qs.map((q, i) => {
       let seed, m, key;
       if (saved) {
         seed = saved.seeds[i];
-        m = makeVariant(q, seed);
+        m = makeVariant(q, seed, rngFn);
       } else {
         // Chọn biến thể chưa gặp, và có đáp án chưa xuất hiện quá 2 lần trong bộ đề này
         const old = new Set(seen[q.id] || []);
         for (let t = 0; t < 40; t++) {
           seed = Math.floor(rand() * 4294967296);
-          m = makeVariant(q, seed);
+          m = makeVariant(q, seed, rngFn);
           key = variantKey(q, m.v);
           const repeatedAnswer = q.type !== 'matrix' && (answerCount.get(m.correct) || 0) >= 2;
           if (!old.has(key) && !repeatedAnswer) break;
@@ -81,7 +82,7 @@
         id: x.q.id, domain: x.q.domain, type: x.q.type, k: x.opts.length,
         a: p.a || x.q.a, b: p.b !== undefined ? p.b : x.q.b,
         seed: x.seed, order, correct: x.correct,
-        prompt: x.v.prompt, seq: x.v.seq, gen: x.v.gen, explain: x.v.explain,
+        prompt: x.v.prompt, seq: x.v.seq, gen: x.v.gen, code: x.v.code, explain: x.v.explain,
         opts: order.map(key => x.opts.find(o => o.key === key)),
       };
     });
@@ -102,17 +103,23 @@
       const start = Math.floor(rand() * k), bag = shuffle(idx.map((_, j) => (start + j) % Number(k)));
       shuffle(idx.slice()).forEach((i, j) => { pos[i] = bag[j]; });
     }
+    const pick1 = arr => arr[Math.floor(rand() * arr.length)];
     const badAt = i => i >= 2 && pos[i] === pos[i - 1] && pos[i] === pos[i - 2];
     const anyBadNear = i => [i, i + 1, i + 2].some(j => j < pos.length && badAt(j));
-    for (let pass = 0; pass < 50; pass++) {
+    for (let pass = 0; pass < 200; pass++) {
       const bad = pos.findIndex((_, i) => badAt(i));
       if (bad < 0) break;
-      const peers = shuffle(groups[ks[bad]].filter(j => pos[j] !== pos[bad]));
-      for (const j of peers) {
-        [pos[bad], pos[j]] = [pos[j], pos[bad]];
-        if (!anyBadNear(bad) && !anyBadNear(j)) break;
-        [pos[bad], pos[j]] = [pos[j], pos[bad]];
+      // Thử đổi vị trí của một trong ba câu của chuỗi lặp với một câu cùng số phương án
+      let fixed = false;
+      for (const x of shuffle([bad, bad - 1, bad - 2])) {
+        for (const j of shuffle(groups[ks[x]].filter(y => pos[y] !== pos[x]))) {
+          [pos[x], pos[j]] = [pos[j], pos[x]];
+          if (!anyBadNear(x) && !anyBadNear(j) && !anyBadNear(x - 2) && !anyBadNear(j - 2)) { fixed = true; break; }
+          [pos[x], pos[j]] = [pos[j], pos[x]];
+        }
+        if (fixed) break;
       }
+      if (!fixed) { const x = shuffle([bad, bad - 1, bad - 2]).find(y => groups[ks[y]].length > 1) ?? bad; const j = pick1(groups[ks[x]].filter(y => y !== x)); if (j !== undefined) [pos[x], pos[j]] = [pos[j], pos[x]]; }
     }
     return pos;
   }
