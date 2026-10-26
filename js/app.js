@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const TIME_LIMIT = 35 * 60; // giây
+  const TIME_LIMIT = 45 * 60; // giây
   const STORE_KEY = 'iqtest.progress.v1';
   const ATTEMPTS_KEY = 'iqtest.attempts';
   const BANK = window.QUESTION_BANK_VERSION;
@@ -309,6 +309,7 @@
         <span class="rv-mark">${resp[i] ? '✓' : '✕'}</span>
         <span class="rv-q"><b>Câu ${i + 1}.</b> ${esc(title)}</span>
         <span class="rv-a ${q.type === 'matrix' ? 'rv-fig' : ''}">${right.html}</span>
+        ${q.explain ? `<span class="rv-ex">${esc(q.explain)}</span>` : ''}
       </li>`;
     }).join('');
 

@@ -11,7 +11,7 @@
   const ARROW = 'arrow';
 
   // Tăng phiên bản khi sửa nội dung hoặc đáp án câu hỏi, để dữ liệu cũ không bị trộn khi chuẩn hoá
-  window.QUESTION_BANK_VERSION = 'v1';
+  window.QUESTION_BANK_VERSION = 'v2';
 
   window.QUESTIONS = [
     // ───────── Suy luận số ─────────
@@ -24,6 +24,12 @@
     { id: 'n7', domain: 'number', b: 1.1, a: 1.6, prompt: 'Số tiếp theo của dãy là?', seq: [3, 4, 7, 11, 18, 29], options: [47, 40, 45, 48, 58], answer: 47 },
     { id: 'n8', domain: 'number', b: 1.6, a: 1.7, prompt: 'Số tiếp theo của dãy là?', seq: [8, 12, 10, 15, 12, 18], options: [14, 13, 15, 21, 16], answer: 14 },
     { id: 'n9', domain: 'number', b: 2.6, a: 1.8, prompt: 'Số tiếp theo của dãy là?', seq: [2, 12, 36, 80, 150], options: [252, 220, 236, 246, 264], answer: 252 },
+    // Hiệu là các số chính phương 1, 4, 9, 16 → +25
+    { id: 'n10', domain: 'number', b: 2.2, a: 1.8, prompt: 'Số tiếp theo của dãy là?', seq: [1, 2, 6, 15, 31], options: [56, 47, 52, 62, 63], answer: 56 },
+    // ×2+1, ×2+2, ×2+3, ×2+4 → ×2+5
+    { id: 'n11', domain: 'number', b: 2.6, a: 1.8, prompt: 'Số tiếp theo của dãy là?', seq: [3, 7, 16, 35, 74], options: [153, 148, 149, 150, 151], answer: 153 },
+    // n² + 1 với n lẻ, n² − 1 với n chẵn
+    { id: 'n12', domain: 'number', b: 3.2, a: 1.9, prompt: 'Số tiếp theo của dãy là?', seq: [2, 3, 10, 15, 26, 35], options: [50, 48, 49, 51, 46], answer: 50 },
 
     // ───────── Ngôn ngữ ─────────
     { id: 'v1', domain: 'verbal', b: -2.3, a: 1.4, prompt: '“Chó” đi với “sủa” như “mèo” đi với…', options: ['Kêu meo meo', 'Gáy', 'Hí', 'Rống'], answer: 'Kêu meo meo' },
@@ -44,7 +50,15 @@
     { id: 'l6', domain: 'logic', b: 0.9, a: 1.6, prompt: 'Một cây bút và một cuốn vở có tổng giá 11.000đ. Cuốn vở đắt hơn cây bút đúng 10.000đ. Cây bút giá bao nhiêu?', options: ['500đ', '1.000đ', '1.500đ', '5.000đ', '10.000đ'], answer: '500đ' },
     { id: 'l7', domain: 'logic', b: 1.4, a: 1.6, prompt: 'Một số có hai chữ số, tổng hai chữ số bằng 9. Nếu đảo ngược thứ tự hai chữ số, số mới lớn hơn số cũ 27 đơn vị. Số đó là?', options: ['36', '27', '45', '63', '18'], answer: '36' },
     { id: 'l8', domain: 'logic', b: 2.1, a: 1.7, prompt: 'Trên đảo có người trung thực (luôn nói thật) và kẻ nói dối (luôn nói dối). A nói: “Ít nhất một trong hai chúng tôi là kẻ nói dối.” A và B là ai?', options: ['A trung thực, B nói dối', 'A nói dối, B trung thực', 'Cả hai đều trung thực', 'Cả hai đều nói dối', 'Không xác định được'], answer: 'A trung thực, B nói dối' },
-    { id: 'l9', domain: 'logic', b: 2.5, a: 1.8, prompt: 'Ba hộp được dán nhãn “Táo”, “Cam” và “Táo và Cam”, nhưng TẤT CẢ nhãn đều sai. Bạn chỉ được lấy 1 quả từ 1 hộp (không nhìn vào trong). Lấy từ hộp nào để xác định đúng nội dung cả ba hộp?', options: ['Hộp dán nhãn “Táo và Cam”', 'Hộp dán nhãn “Táo”', 'Hộp dán nhãn “Cam”', 'Không thể xác định chỉ với 1 lần lấy'], answer: 'Hộp dán nhãn “Táo và Cam”' },
+    // Lúc 3:15 kim giờ ở 97,5°, kim phút ở 90°
+    { id: 'l10', domain: 'logic', b: 2.5, a: 1.8, prompt: 'Đồng hồ chỉ 3 giờ 15 phút. Góc nhỏ hơn tạo bởi kim giờ và kim phút là bao nhiêu độ?', options: ['7,5°', '0°', '5°', '12,5°', '15°'], answer: '7,5°' },
+    // Chi là giáo viên (nhỏ tuổi nhất) → Bình lớn tuổi hơn kỹ sư nên Bình là bác sĩ
+    { id: 'l11', domain: 'logic', b: 2.4, a: 1.8, prompt: 'An, Bình, Chi làm ba nghề khác nhau: bác sĩ, kỹ sư, giáo viên. Biết: (1) Người giáo viên nhỏ tuổi nhất. (2) Bình lớn tuổi hơn người kỹ sư. (3) An không phải giáo viên và An nhỏ tuổi hơn Bình. Ai là bác sĩ?', options: ['Bình', 'An', 'Chi', 'Không xác định được'], answer: 'Bình' },
+    // 3 lần cân chia 3 nhóm: 3² = 9 < 12 ≤ 27 = 3³
+    { id: 'l12', domain: 'logic', b: 2.7, a: 1.8, prompt: 'Có 12 đồng xu trông giống hệt nhau, trong đó đúng 1 đồng giả nhẹ hơn. Dùng cân hai đĩa (không có quả cân), cần ít nhất bao nhiêu lần cân để CHẮC CHẮN tìm ra đồng giả?', options: ['3', '2', '4', '6', '11'], answer: '3' },
+    // A thật → B dối → A, C khác loại → C dối. A dối → B thật → A, C cùng loại → C dối.
+    { id: 'l13', domain: 'logic', b: 3.1, a: 1.9, prompt: 'Trên đảo có người trung thực (luôn nói thật) và kẻ nói dối (luôn nói dối). A nói: “B là kẻ nói dối.” B nói: “A và C cùng một loại người.” Có thể kết luận gì về C?', options: ['C là kẻ nói dối', 'C là người trung thực', 'Không xác định được', 'Không thể có tình huống này'], answer: 'C là kẻ nói dối' },
+    { id: 'l9', domain: 'logic', b: 2.5, a: 1.8, prompt: 'Có ba hộp: một hộp chỉ đựng táo, một hộp chỉ đựng cam, một hộp đựng cả táo và cam. Các hộp được dán nhãn “Táo”, “Cam”, “Táo và Cam”, nhưng TẤT CẢ nhãn đều dán sai. Bạn chỉ được lấy ra 1 quả từ 1 hộp (không nhìn vào trong). Lấy từ hộp nào để xác định đúng nội dung cả ba hộp?', options: ['Hộp dán nhãn “Táo và Cam”', 'Hộp dán nhãn “Táo”', 'Hộp dán nhãn “Cam”', 'Không thể xác định chỉ với 1 lần lấy'], answer: 'Hộp dán nhãn “Táo và Cam”' },
 
     // ───────── Ma trận hình (kiểu Raven) ─────────
     {
@@ -135,5 +149,88 @@
         { shape: ARROW, rot: 180, fill: 'solid' },
       ],
     },
+    {
+      // Cột 3 = các nét có ở CẢ cột 1 và cột 2 (giao)
+      id: 'm10', domain: 'spatial', type: 'matrix', b: 2.4, a: 1.8,
+      gen: (r, c) => ({ lines: [
+        [['top', 'left', 'd1', 'h'], ['top', 'd1', 'v', 'right'], ['top', 'd1']],
+        [['h', 'v', 'bottom', 'd2'], ['h', 'd2', 'left', 'top'], ['h', 'd2']],
+        [['left', 'right', 'top', 'd1', 'd2'], ['right', 'd1', 'bottom', 'v', 'left'], ['left', 'right', 'd1']],
+      ][r][c] }),
+      distractors: [
+        { lines: ['left', 'right', 'top', 'd1', 'd2', 'bottom', 'v'] }, { lines: ['top', 'd2', 'bottom', 'v'] },
+        { lines: ['left', 'right'] }, { lines: ['left', 'd1'] }, { lines: ['right', 'd1', 'top'] },
+      ],
+    },
+    {
+      // Mỗi hàng xoay đều một góc: hàng 1 +45°, hàng 2 +90°, hàng 3 +135°
+      id: 'm11', domain: 'spatial', type: 'matrix', b: 2.8, a: 1.8,
+      gen: (r, c) => ({ shape: ARROW, rot: (45 * (r + 1) * c) % 360, fill: 'solid' }),
+      distractors: [180, 225, 315, 135, 90].map(rot => ({ shape: ARROW, rot, fill: 'solid' })),
+    },
+    {
+      // Hình và tô màu theo hình vuông Latin; số lượng: cột 3 = cột 1 + cột 2
+      id: 'm12', domain: 'spatial', type: 'matrix', b: 3.3, a: 1.9,
+      gen: (r, c) => ({
+        shape: ['diamond', 'circle', 'triangle'][(r + c) % 3],
+        fill: ['solid', 'none', 'gray'][(r + 2 * c) % 3],
+        n: [[1, 1, 2], [2, 1, 3], [1, 3, 4]][r][c],
+      }),
+      distractors: [
+        { shape: 'circle', fill: 'solid', n: 3 }, { shape: 'circle', fill: 'none', n: 4 },
+        { shape: 'triangle', fill: 'solid', n: 4 }, { shape: 'circle', fill: 'gray', n: 4 },
+        { shape: 'diamond', fill: 'solid', n: 4 },
+      ],
+    },
   ];
+
+  // Lời giải hiển thị ở phần "Xem đáp án" sau khi nộp bài
+  const EXPLAIN = {
+    n1: 'Mỗi số cộng thêm 2: 8 + 2 = 10.',
+    n2: 'Mỗi số nhân 2: 24 × 2 = 48.',
+    n3: 'Các số chính phương 1², 2², …, 5² → 6² = 36.',
+    n4: 'Hiệu tăng dần 1, 2, 3, 4, 5 → 17 + 6 = 23.',
+    n5: 'Xen kẽ +5 và −2: 15 − 2 = 13.',
+    n6: 'Nhân 2 rồi trừ 1: 33 × 2 − 1 = 65.',
+    n7: 'Mỗi số bằng tổng hai số liền trước: 18 + 29 = 47.',
+    n8: 'Hai dãy xen kẽ: vị trí lẻ 8, 10, 12 (+2), vị trí chẵn 12, 15, 18 (+3). Số thứ 7 thuộc dãy lẻ → 14.',
+    n9: 'Số thứ n bằng n² × (n + 1): 1·2, 4·3, 9·4, 16·5, 25·6 → 36·7 = 252.',
+    n10: 'Hiệu giữa các số là 1, 4, 9, 16 (bình phương) → tiếp theo +25: 31 + 25 = 56.',
+    n11: 'Nhân 2 rồi cộng lần lượt 1, 2, 3, 4 → 74 × 2 + 5 = 153.',
+    n12: 'Số thứ n bằng n² + 1 nếu n lẻ, n² − 1 nếu n chẵn → 7² + 1 = 50.',
+    v1: 'Tiếng kêu đặc trưng của con vật: chó sủa, mèo kêu meo meo.',
+    v2: 'Cà rốt là rau củ, các từ còn lại là trái cây.',
+    v3: 'Nơi làm việc: bác sĩ ở bệnh viện, giáo viên ở trường học.',
+    v4: 'Khiêm tốn là không tự đề cao mình, trái nghĩa với kiêu ngạo.',
+    v5: 'Quan hệ bộ phận – tổng thể: chương là một phần của sách, khổ thơ là một phần của bài thơ.',
+    v6: 'Bốn từ còn lại đều chỉ sự nghi ngờ; “tin tưởng” mang nghĩa ngược lại.',
+    v7: 'Mẹ của bố tôi là bà nội của tôi; đối với con trai tôi, bà là cụ nội (bà cố).',
+    v8: 'Người đàn ông là con một nên “con trai của bố tôi” chính là ông ấy. Bố của người trong ảnh là ông ấy → người trong ảnh là con trai ông.',
+    l1: 'An > Bình > Cường nên Cường thấp nhất.',
+    l2: 'Hôm qua là thứ Hai → hôm nay thứ Ba → ngày kia (2 ngày sau) là thứ Năm.',
+    l3: 'Mỗi máy làm 1 sản phẩm trong 5 phút. 100 máy làm song song 100 sản phẩm vẫn mất 5 phút.',
+    l4: 'Chỉ có 2 màu, nên lấy 3 chiếc thì chắc chắn có 2 chiếc cùng màu (nguyên lý Dirichlet).',
+    l5: '“Một số loài hoa tàn nhanh” có thể là các loài khác, không nhất thiết có hoa hồng → không kết luận được.',
+    l6: 'Bút giá x, vở giá x + 10.000 → 2x + 10.000 = 11.000 → x = 500đ.',
+    l7: 'Số có dạng 10a + b với a + b = 9. Đảo lại lớn hơn 27 → 9(b − a) = 27 → b − a = 3 → a = 3, b = 6 → 36.',
+    l8: 'Nếu A nói dối thì câu “ít nhất một người nói dối” lại thành đúng – mâu thuẫn. Vậy A trung thực, câu nói đúng, nên B là kẻ nói dối.',
+    l9: 'Hộp nhãn “Táo và Cam” bị dán sai nên chỉ chứa MỘT loại – lấy 1 quả là biết ngay (giả sử là cam → đây là hộp Cam). Hộp nhãn “Táo” không phải hộp Táo, mà hộp Cam đã tìm ra → nó là hộp Táo và Cam. Hộp còn lại (nhãn “Cam”) là hộp Táo. Lấy từ hộp khác thì không đủ: một quả cam từ hộp nhãn “Táo” có thể đến từ hộp Cam hoặc hộp hỗn hợp.',
+    l10: 'Kim phút chỉ số 3 (90°). Kim giờ đã đi thêm 1/4 khoảng từ số 3 đến số 4: 90° + 30° × 1/4 = 97,5°. Góc giữa hai kim là 7,5°.',
+    l11: 'An không phải giáo viên. Bình lớn tuổi hơn An nên không nhỏ tuổi nhất → cũng không phải giáo viên. Vậy Chi là giáo viên. Bình lớn tuổi hơn người kỹ sư nên Bình không phải kỹ sư → Bình là bác sĩ.',
+    l12: 'Mỗi lần cân chia xu thành 3 nhóm (đĩa trái, đĩa phải, ngoài cân) và biết đồng giả nằm ở nhóm nào: 12 → 4 → 2 → 1, tức 3 lần. Cân 2 lần chỉ phân biệt được tối đa 3 × 3 = 9 đồng, không đủ cho 12.',
+    l13: 'Nếu A trung thực: B nói dối → câu của B sai → A và C khác loại → C nói dối. Nếu A nói dối: B trung thực → A và C cùng loại → C nói dối. Cả hai trường hợp C đều là kẻ nói dối.',
+    m1: 'Mỗi hàng một loại hình; số hình theo cột là 1, 2, 3 → 3 hình tam giác.',
+    m2: 'Loại hình theo cột (tròn, vuông, thoi), màu theo hàng (trắng, xám, đen) → hình thoi màu đen.',
+    m3: 'Mũi tên xoay thêm 45° mỗi cột, mỗi hàng bắt đầu lệch 90° → hàng 3: 180°, 225°, 270° (chỉ sang trái).',
+    m4: 'Mỗi hàng có đủ 3 loại hình và đủ số lượng 1, 2, 3 → hàng cuối còn thiếu 1 hình tam giác.',
+    m5: 'Số hình ở cột 3 = cột 1 + cột 2: 2 + 3 = 5 ngôi sao.',
+    m6: 'Mỗi hàng có đủ 3 loại hình ngoài và 3 loại hình trong → còn thiếu hình vuông chứa hình tròn.',
+    m7: 'Cột 3 giữ các nét chỉ có ở MỘT trong hai cột đầu, nét trùng nhau thì biến mất → hàng 3: nét trên, nét dưới, nét trái.',
+    m8: 'Mỗi hàng đủ 3 loại hình và 3 màu; số hình theo cột là 1, 2, 3 → 3 tam giác màu trắng.',
+    m9: 'Đọc từ trái sang phải, trên xuống dưới: mũi tên xoay thêm 45° mỗi ô, màu xen kẽ trắng/đen → ô thứ 9 xoay đủ 360° (chỉ lên) và màu trắng.',
+    m10: 'Cột 3 chỉ giữ các nét có ở CẢ hai cột đầu → hàng 3: nét trái, nét phải, đường chéo.',
+    m11: 'Mỗi hàng xoay đều một góc: hàng 1 +45°, hàng 2 +90°, hàng 3 +135° → 135° + 135° = 270° (chỉ sang trái).',
+    m12: 'Mỗi hàng đủ 3 loại hình và 3 màu; số hình ở cột 3 = cột 1 + cột 2: 1 + 3 = 4 → 4 hình tròn màu đen.',
+  };
+  window.QUESTIONS.forEach(q => { q.explain = EXPLAIN[q.id]; });
 })();

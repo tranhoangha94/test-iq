@@ -51,7 +51,7 @@ Ghi chú lâm sàng: theo DSM-5 và ICD-11, IQ < 70 chỉ là **một** tiêu ch
 
 ## 5. Website áp dụng như thế nào
 
-1. **35 câu, 4 lĩnh vực** (dãy số, ngôn ngữ, logic, ma trận kiểu Raven), sắp xếp từ dễ đến khó, giới hạn 35 phút (bài test năng lực, tương tự Raven APM 40 phút).
+1. **45 câu, 4 lĩnh vực** (dãy số, ngôn ngữ, logic, ma trận kiểu Raven), sắp xếp từ dễ đến khó, giới hạn 45 phút. Có 15 câu khó (b ≥ 2) để phân biệt tốt ở mức IQ 125–160 (bài test năng lực, tương tự Raven APM 40 phút).
 2. **IRT 3PL:** mỗi câu có độ khó `b`, độ phân biệt `a`, xác suất đoán mò `c = 1/số phương án`:
    `P(đúng | θ) = c + (1 − c) / (1 + e^(−a(θ − b)))`
 3. **Ước lượng EAP** với tiên nghiệm theo nhóm tuổi `θ ~ N(μ_tuổi, 1)` → θ và sai số chuẩn SE.
@@ -59,7 +59,7 @@ Ghi chú lâm sàng: theo DSM-5 và ICD-11, IQ < 70 chỉ là **một** tiêu ch
 5. **IQ = 100 + 15z**, giới hạn trong 40–160. Bách phân vị = Φ(z). Khoảng tin cậy 95% = IQ ± 1,96 × 15 × SE.
 6. Quy đổi thêm sang thang SD 16 và SD 24.
 
-Kiểm tra mô phỏng (người 25 tuổi): đúng 0/35 → 57 · đúng 18/35 → 103 · đúng 30/35 → 128 · đúng 35/35 → 146 · đoán mò ngẫu nhiên → khoảng 64.
+Kiểm tra mô phỏng (người 22 tuổi, đúng N câu dễ nhất): 0 → 57 · 20 → 107 · 30 → 124 · 35 → 132 · 40 → 141 · 45 → 156.
 
 ## 6. Giới hạn cần nói rõ với người dùng
 

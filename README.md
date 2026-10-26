@@ -18,7 +18,7 @@ Mở http://localhost:5173. Server vừa phục vụ website, vừa nhận kết
 | `index.html` | 3 màn hình: giới thiệu, làm bài, kết quả |
 | `css/style.css` | Giao diện |
 | `js/config.js` | Cấu hình địa chỉ nhận kết quả ẩn danh (`collectUrl`) |
-| `js/questions.js` | Ngân hàng 35 câu, tham số IRT ban đầu (`a`, `b`), phiên bản `QUESTION_BANK_VERSION` |
+| `js/questions.js` | Ngân hàng 45 câu, tham số IRT ban đầu (`a`, `b`), phiên bản `QUESTION_BANK_VERSION` |
 | `js/params.js` | Tham số đã chuẩn hoá từ dữ liệu thực (do `tools/calibrate.py` tạo; mặc định `null`) |
 | `js/scoring.js` | Chấm điểm: IRT 3PL + EAP, chuẩn tuổi, IQ độ lệch (100 + 15z) |
 | `js/app.js` | Luồng làm bài, đồng hồ, lưu tiến độ, gửi kết quả, vẽ trang kết quả |
